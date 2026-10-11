@@ -1,0 +1,1 @@
+- "Create it only if it's missing" -> check with an ID function (DB_ID, SCHEMA_ID, OBJECT_ID) IS NULL.
