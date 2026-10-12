@@ -6,7 +6,7 @@ Used for: the whole DW, all milestones
 ### olist_customers_dataset.csv
 - Columns: "customer_id","customer_unique_id","customer_zip_code_prefix","customer_city","customer_state"
 - Links to: olist_geolocation_dataset.csv, olist_orders_dataset.csv
-- Observations: (fill in as you find them)
+- Observations: Quoting is inconsistent after BULK INSERT (no FORMAT = 'CSV'): customer_id, customer_unique_id and zip prefix are often wrapped in literal double quotes, but not always. Quotes must be removed in cleaning (Step 4) before joining to orders. Zip prefix has leading zeros -> keep as text. 99,441 rows loaded.
 
 ### olist_geolocation_dataset.csv
 - Columns: "geolocation_zip_code_prefix","geolocation_lat","geolocation_lng","geolocation_city","geolocation_state"
@@ -26,12 +26,13 @@ Used for: the whole DW, all milestones
 ### olist_order_reviews_dataset.csv
 - Columns: "review_id","order_id","review_score","review_comment_title","review_comment_message","review_creation_date","review_answer_timestamp"
 - Links to: olist_order_items_dataset.csv, olist_order_payments_dataset.csv, olist_orders_dataset.csv
-- Observations: (fill in as you find them)
+- Observations: File is UTF-8 with CRLF line endings (customers is LF). Comments contain line breaks inside quotes (e.g. line 57 continues on 58), so a plain BULK INSERT splits one review into several rows and shifts columns -> truncation errors 4863. Failed loads roll back fully (table empty).
+- Fixed by BULK INSERT ... FORMAT = 'CSV', FIELDQUOTE = '"' (no ROWTERMINATOR). Comments contain line breaks inside quotes.
 
 ### olist_orders_dataset.csv
 - Columns: "order_id","customer_id","order_status","order_purchase_timestamp","order_approved_at","order_delivered_carrier_date","order_delivered_customer_date","order_estimated_delivery_date"
 - Links to: olist_customers_dataset.csv, olist_order_items_dataset.csv, olist_order_items_dataset.csv, olist_order_payments_dataset.csv, olist_order_reviews_dataset.csv
-- Observations: (fill in as you find them)
+- Observations: 99,441 rows. order_id and customer_id have inconsistent literal double quotes (same as customers). Timestamps look consistent (yyyy-mm-dd hh:mm:ss). Missing delivery dates display as NULL. Missing delivery dates are real SQL NULLs, not the text 'NULL'.
 
 ### olist_products_dataset.csv
 - Columns: "product_id","product_category_name","product_name_lenght","product_description_lenght","product_photos_qty","product_weight_g","product_length_cm","product_height_cm","product_width_cm"
